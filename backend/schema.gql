@@ -1,0 +1,48 @@
+type Team {
+    id: ID!
+    owner: User!
+	name: String!
+    members: [User!]!
+    channels: [Channel!]!
+}
+
+type Channel {
+    id: ID!
+    name: String!
+    isPublic: Boolean!
+	owner: User!
+	team: Team!
+    messages: [Message!]!
+    members: [User!]!
+}
+
+type Message {
+    id: ID!
+    text: String!
+    user: User!
+	timestamp: String!
+    channel: Channel!
+}
+
+type User {
+	id: ID!
+    username: String!
+    email: String!
+    teams: [Team!]!
+}
+
+type Query {
+    ping: String!
+
+	userTeamList(userId: Int!): [Team!]!
+	channelMessageList(channelId: Int!): [Message!]!
+	teamChannelList(teamId: Int!): [Channel!]!
+
+	team(id: Int!): Team!
+	channel(id: Int!): Channel!
+	user(id: Int!): User!
+}
+
+schema {
+	query: Query
+}
