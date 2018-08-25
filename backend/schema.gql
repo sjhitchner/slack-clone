@@ -46,7 +46,7 @@ type Query {
 input CreateUserInput {
 	username: String!
 	email: String!
-	password: String
+	password: String!
 }
 
 input SendMessageInput {
@@ -55,30 +55,64 @@ input SendMessageInput {
 	text: String!
 }
 
-input CreateTeamInput {}
-input CreateChannelInput {}
-input AddUserToTeam {}
-input AddUserToChannel {}
+input CreateTeamInput {
+	name: String!
+	ownerId: Int!
+}
+
+input CreateChannelInput {
+	teamId: Int!
+	ownerId: Int!
+	name: String!
+	isPublic: Boolean!
+}
+
+input AddTeamMemberInput {
+	teamId: Int!
+	userId: Int!
+}
+
+input AddChannelMemberInput {
+	channelId: Int!
+	userId: Int!
+}
 
 type CreateUserOutput {
 	user: User!
+}
+
+type CreateTeamOutput {
+	team: Team!
+}
+
+type CreateChannelOutput {
+	channel: Channel!
 }
 
 type SendMessageOutput {
 	ok: Boolean!
 }
 
+type AddTeamMemberOutput {
+	ok: Boolean!
+}
+
+type AddChannelMemberOutput {
+	ok: Boolean!
+}
+
 type Mutation {
-	createUser(input: CreateUserInput!) CreateUserOutput!
-	createTeam(input: CreateTeamInput!) CreateTeamOutput!
-	createChannel(input: CreateChannelInput!) CreateChannelOutput!
+	createUser(input: CreateUserInput!): CreateUserOutput!
+	createTeam(input: CreateTeamInput!): CreateTeamOutput!
+	createChannel(input: CreateChannelInput!): CreateChannelOutput!
 
-	addUserToTeam(input: AddUserToTeam!) AddUserToTeamOutput!
-	addUserToChannel(input: AddUserToChannel!) AddUserToChannel!
+	# addTeamMember(input: AddTeamMemberInput!): AddTeamMemberOutput!
+	# addChannelMember(input: AddChannelMemberInput!): AddChannelMemberOutput!
 
-	sendMessage(input: SendMessageInput!) SendMessageOutput!
+	# sendMessage(input: SendMessageInput!): SendMessageOutput!
 }
 
 schema {
 	query: Query
+	mutation: Mutation
 }

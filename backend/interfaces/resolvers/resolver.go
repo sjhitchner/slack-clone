@@ -10,6 +10,7 @@ import (
 )
 
 type Resolver struct {
+	*Mutation
 }
 
 func (t *Resolver) Ping(ctx context.Context) string {

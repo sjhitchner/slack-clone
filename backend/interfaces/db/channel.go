@@ -27,6 +27,23 @@ const SelectChannelsByTeamId = SelectChannel + `
 WHERE channel.team_id = $1
 `
 
+const InsertChannel = `
+INSERT INTO channel (
+    team_id
+  , owner_id
+  , name
+  , is_public
+) VALUES ($1, $2, $3, $4)
+`
+
+const UpdateChannel = `
+UPDATE channel SET
+	 name = $2
+  , owner_id = $3
+  , is_public = $4
+WHERE id = $1
+`
+
 type ChannelDB struct {
 	db db.DBHandler
 }
@@ -45,4 +62,17 @@ func (t *ChannelDB) ListChannelsByTeamId(ctx context.Context, teamId int64) ([]*
 	var list []*domain.Channel
 	err := t.db.Select(ctx, &list, SelectChannelsByTeamId, teamId)
 	return list, errors.Wrapf(err, "error getting channels by team '%d'", teamId)
+}
+
+func (t *ChannelDB) CreateChannel(ctx context.Context, channel *domain.Channel) (*domain.Channel, error) {
+	id, err := t.db.InsertWithId(
+		ctx,
+		InsertChannel,
+		channel.TeamId,
+		channel.OwnerId,
+		channel.Name,
+		channel.IsPublic,
+	)
+	channel.Id = id
+	return channel, errors.Wrapf(err, "unable to insert channel")
 }

@@ -52,12 +52,16 @@ type TeamRepo interface {
 	ListTeamsByOwnerId(ctx context.Context, ownerId int64) ([]*Team, error)
 	ListTeamsByUserId(ctx context.Context, userId int64) ([]*Team, error)
 	// ListTeams(ctx context.Context) ([]*Team, error)
+
+	CreateTeam(ctx context.Context, team *Team) (*Team, error)
 }
 
 type ChannelRepo interface {
 	GetChannelById(ctx context.Context, id int64) (*Channel, error)
 
 	ListChannelsByTeamId(ctx context.Context, teamId int64) ([]*Channel, error)
+
+	CreateChannel(ctx context.Context, channel *Channel) (*Channel, error)
 }
 
 type UserRepo interface {
@@ -67,6 +71,8 @@ type UserRepo interface {
 
 	ListUsersByTeamId(ctx context.Context, teamId int64) ([]*User, error)
 	ListUsersByChannelId(ctx context.Context, channelId int64) ([]*User, error)
+
+	CreateUser(ctx context.Context, user *User) (*User, error)
 }
 
 type MessageRepo interface {

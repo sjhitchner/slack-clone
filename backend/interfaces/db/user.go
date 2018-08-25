@@ -18,26 +18,42 @@ SELECT
 FROM user 
 `
 
-const SelectUserById = `
-WHERE id = $1
+const SelectUserById = SelectUser + `
+WHERE user.id = $1
 `
 
-const SelectUserByEmail = `
-WHERE email = $1
+const SelectUserByEmail = SelectUser + `
+WHERE user.email = $1
 `
 
-const SelectUserByUsername = `
-WHERE username = $1
+const SelectUserByUsername = SelectUser + `
+WHERE user.username = $1
 `
 
-const SelectUsersByTeamId = `
+const SelectUsersByTeamId = SelectUser + `
 JOIN team_member ON team_member.user_id = user.id
 WHERE team_member.team_id = $1
 `
 
-const SelectUsersByChannelId = `
+const SelectUsersByChannelId = SelectUser + `
 JOIN channel_member ON channel_member.user_id = user.id
 WHERE channel_member.user_id = $1
+`
+
+const InsertUser = `
+INSERT INTO user (
+	 username
+  , email
+  , password
+) VALUES ($1, $2, $3)
+`
+
+const UpdateUser = `
+UPDATE user SET
+    username = $2
+  , email = $3
+  , password = $4
+WHERE id = $1
 `
 
 type UserDB struct {
@@ -76,4 +92,16 @@ func (t *UserDB) ListUsersByChannelId(ctx context.Context, channelId int64) ([]*
 	var list []*domain.User
 	err := t.db.Select(ctx, &list, SelectUsersByChannelId, channelId)
 	return list, errors.Wrapf(err, "error getting users by channel '%d'", channelId)
+}
+
+func (t *UserDB) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
+	id, err := t.db.InsertWithId(
+		ctx,
+		InsertUser,
+		user.Username,
+		user.Email,
+		user.Password,
+	)
+	user.Id = id
+	return user, errors.Wrapf(err, "unable to insert user")
 }

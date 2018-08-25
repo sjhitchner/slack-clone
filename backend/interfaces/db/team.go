@@ -30,6 +30,17 @@ JOIN team_member ON team.id = team_member.team_id
 WHERE team_member.user_id = $1
 `
 
+const InsertTeam = `
+INSERT INTO team (
+    owner_id
+  , name
+) VALUES ($1, $2)
+`
+
+const UpdateTeam = `
+UPDATE team SET owner_id = $2, name = $3 WHERE id = $1
+`
+
 type TeamDB struct {
 	db db.DBHandler
 }
@@ -58,3 +69,14 @@ func (t *TeamDB) ListTeamsByUserId(ctx context.Context, userId int64) ([]*domain
 
 //func (t *TeamDB) ListTeams(ctx context.Context) ([]*Team, error) {
 //}
+
+func (t *TeamDB) CreateTeam(ctx context.Context, team *domain.Team) (*domain.Team, error) {
+	id, err := t.db.InsertWithId(
+		ctx,
+		InsertTeam,
+		team.OwnerId,
+		team.Name,
+	)
+	team.Id = id
+	return team, errors.Wrapf(err, "unable to insert team")
+}
