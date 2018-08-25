@@ -49,25 +49,34 @@ input CreateUserInput {
 	password: String
 }
 
-input MessageInput {
+input SendMessageInput {
 	userId: Int!
 	channelId: Int!
 	text: String!
 }
 
-type CreateUserPayload {
+input CreateTeamInput {}
+input CreateChannelInput {}
+input AddUserToTeam {}
+input AddUserToChannel {}
+
+type CreateUserOutput {
 	user: User!
 }
 
-type MessagePayload {
+type SendMessageOutput {
 	ok: Boolean!
 }
 
 type Mutation {
-	createUser(input: CreateUserInput!) CreateUserPayload!
-	createTeam(input: CreateTeamInput!) CreateTeamPayload!
-	createChannel(input: CreateChannelInput!) CreateChannelPayload!
-	message(input: MessageInput!) MessagePayload!
+	createUser(input: CreateUserInput!) CreateUserOutput!
+	createTeam(input: CreateTeamInput!) CreateTeamOutput!
+	createChannel(input: CreateChannelInput!) CreateChannelOutput!
+
+	addUserToTeam(input: AddUserToTeam!) AddUserToTeamOutput!
+	addUserToChannel(input: AddUserToChannel!) AddUserToChannel!
+
+	sendMessage(input: SendMessageInput!) SendMessageOutput!
 }
 
 schema {
