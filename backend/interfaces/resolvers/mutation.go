@@ -101,12 +101,59 @@ type SendMessageInput struct {
 	Text      string
 }
 
+type SendMessageResolver struct {
+	Ok bool
+}
+
+func (t *SendMemberResolver) Ok() boolean {
+	return t.Ok
+}
+
+func (t *Mutation) SendMessage(ctx context.Context, args struct {
+	Input SendMessageInput
+}) (*SendMessageResolver, error) {
+	message := &domain.Message{
+		UserId:   int64(args.Input.UserId),
+		ChannelId:  int64(args.Input.ChannelId),
+		Text:     args.Input.Text,
+	}
+	err := Aggregator(ctx).SendMessage(ctx, message)
+	return &SendMessageResolver{err == nil}, errors.Wrapf(err, "error sending message")
+}
+
 type AddTeamMemberInput struct {
 	TeamId int32
 	UserId int32
 }
 
+type AddTeamMemberResolver struct {
+	Ok bool
+}
+
+func (t *AddTeamMemberResolver) Ok() boolean {
+	return t.Ok
+}
+
+func (t *Mutation) AddTeamMember(ctx context.Context, args struct {
+	Input AddTeamInput
+}) (*AddTeamMemberResolver, error) {
+}
+
+
 type AddChannelMemberInput struct {
 	ChannelId int32
 	UserId    int32
+}
+
+type AddChannelMemberResolver struct {
+	Ok bool
+}
+
+func (t *AddChannelResolver) Ok() boolean {
+	return t.Ok
+}
+
+func (t *Mutation) AddChannelMember(ctx context.Context, args struct {
+	Input AddChannelInput
+}) (*AddChannelMessageResolver, error) {
 }
