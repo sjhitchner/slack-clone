@@ -43,6 +43,33 @@ type Query {
 	user(id: Int!): User!
 }
 
+input CreateUserInput {
+	username: String!
+	email: String!
+	password: String
+}
+
+input MessageInput {
+	userId: Int!
+	channelId: Int!
+	text: String!
+}
+
+type CreateUserPayload {
+	user: User!
+}
+
+type MessagePayload {
+	ok: Boolean!
+}
+
+type Mutation {
+	createUser(input: CreateUserInput!) CreateUserPayload!
+	createTeam(input: CreateTeamInput!) CreateTeamPayload!
+	createChannel(input: CreateChannelInput!) CreateChannelPayload!
+	message(input: MessageInput!) MessagePayload!
+}
+
 schema {
 	query: Query
 }
