@@ -54,6 +54,8 @@ type TeamRepo interface {
 	// ListTeams(ctx context.Context) ([]*Team, error)
 
 	CreateTeam(ctx context.Context, team *Team) (*Team, error)
+	AddTeamMember(ctx context.Context, teamMember *TeamMember) error
+	DeleteTeamMember(ctx context.Context, teamMember *TeamMember) error
 }
 
 type ChannelRepo interface {
@@ -62,6 +64,8 @@ type ChannelRepo interface {
 	ListChannelsByTeamId(ctx context.Context, teamId int64) ([]*Channel, error)
 
 	CreateChannel(ctx context.Context, channel *Channel) (*Channel, error)
+	AddChannelMember(ctx context.Context, channelMember *ChannelMember) error
+	DeleteChannelMember(ctx context.Context, channelMember *ChannelMember) error
 }
 
 type UserRepo interface {
@@ -80,6 +84,8 @@ type MessageRepo interface {
 
 	ListMessagesByChannelId(ctx context.Context, channelId int64) ([]*Message, error)
 	// ListMessagesByUserId(ctx context.Context, userId int64) ([]*Message, error)
+
+	SendMessage(ctx context.Context, message *Message) error
 }
 
 type Aggregator interface {

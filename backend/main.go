@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS message (
 	, user_id INTEGER NOT NULL
 	, channel_id INTEGER NOT NULL
 	, text TEXT NOT NULL
-	, timestamp DATETIME NOT NULL
+	, timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, FOREIGN KEY (user_id) REFERENCES user(id)
 	, FOREIGN KEY (channel_id) REFERENCES channel(id)
 );

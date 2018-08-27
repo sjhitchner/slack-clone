@@ -44,6 +44,14 @@ UPDATE channel SET
 WHERE id = $1
 `
 
+const InsertChannelMember = `
+INSERT INTO channel_member (channel_id, user_id) VALUES ($1, $2)
+`
+
+const DeleteChannelMember = `
+DELETE FROM channel_member WHERE channel_id = $1 AND user_id = $2
+`
+
 type ChannelDB struct {
 	db db.DBHandler
 }
@@ -75,4 +83,24 @@ func (t *ChannelDB) CreateChannel(ctx context.Context, channel *domain.Channel) 
 	)
 	channel.Id = id
 	return channel, errors.Wrapf(err, "unable to insert channel")
+}
+
+func (t *ChannelDB) AddChannelMember(ctx context.Context, member *domain.ChannelMember) error {
+	err := t.db.Insert(
+		ctx,
+		InsertChannelMember,
+		member.ChannelId,
+		member.UserId,
+	)
+	return errors.Wrap(err, "unabled to insert channel member")
+}
+
+func (t *ChannelDB) DeleteChannelMember(ctx context.Context, member *domain.ChannelMember) error {
+	_, err := t.db.Delete(
+		ctx,
+		DeleteChannelMember,
+		member.ChannelId,
+		member.UserId,
+	)
+	return errors.Wrap(err, "unabled to delete channel member")
 }

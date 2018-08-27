@@ -31,6 +31,18 @@ const SelectMessagesByChannelId = `
 WHERE channel_id = $1
 `
 
+const InsertMessage = `
+INSERT INTO message (
+	 user_id
+  , channel_id
+  , text
+) VALUES (
+    $1
+  , $2
+  , $3
+)
+`
+
 type MessageDB struct {
 	db db.DBHandler
 }
@@ -55,4 +67,15 @@ func (t *MessageDB) ListMessagesByChannelId(ctx context.Context, channelId int64
 	var list []*domain.Message
 	err := t.db.Select(ctx, &list, SelectMessagesByChannelId, channelId)
 	return list, errors.Wrapf(err, "error getting messages by channel '%d'", channelId)
+}
+
+func (t *MessageDB) SendMessage(ctx context.Context, message *domain.Message) error {
+	err := t.db.Insert(
+		ctx,
+		InsertMessage,
+		message.UserId,
+		message.ChannelId,
+		message.Text,
+	)
+	return errors.Wrapf(err, "error inserting message")
 }

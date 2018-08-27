@@ -102,58 +102,91 @@ type SendMessageInput struct {
 }
 
 type SendMessageResolver struct {
-	Ok bool
+	ok bool
 }
 
-func (t *SendMemberResolver) Ok() boolean {
-	return t.Ok
+func (t *SendMessageResolver) Ok() bool {
+	return t.ok
 }
 
 func (t *Mutation) SendMessage(ctx context.Context, args struct {
 	Input SendMessageInput
 }) (*SendMessageResolver, error) {
 	message := &domain.Message{
-		UserId:   int64(args.Input.UserId),
-		ChannelId:  int64(args.Input.ChannelId),
-		Text:     args.Input.Text,
+		UserId:    int64(args.Input.UserId),
+		ChannelId: int64(args.Input.ChannelId),
+		Text:      args.Input.Text,
 	}
 	err := Aggregator(ctx).SendMessage(ctx, message)
 	return &SendMessageResolver{err == nil}, errors.Wrapf(err, "error sending message")
 }
 
-type AddTeamMemberInput struct {
+type TeamMemberInput struct {
 	TeamId int32
 	UserId int32
 }
 
-type AddTeamMemberResolver struct {
-	Ok bool
+type TeamMemberResolver struct {
+	ok bool
 }
 
-func (t *AddTeamMemberResolver) Ok() boolean {
-	return t.Ok
+func (t *TeamMemberResolver) Ok() bool {
+	return t.ok
 }
 
 func (t *Mutation) AddTeamMember(ctx context.Context, args struct {
-	Input AddTeamInput
-}) (*AddTeamMemberResolver, error) {
+	Input TeamMemberInput
+}) (*TeamMemberResolver, error) {
+	member := &domain.TeamMember{
+		TeamId: int64(args.Input.TeamId),
+		UserId: int64(args.Input.UserId),
+	}
+	err := Aggregator(ctx).AddTeamMember(ctx, member)
+	return &TeamMemberResolver{err == nil}, errors.Wrapf(err, "error adding team member")
 }
 
+func (t *Mutation) DeleteTeamMember(ctx context.Context, args struct {
+	Input TeamMemberInput
+}) (*TeamMemberResolver, error) {
+	member := &domain.TeamMember{
+		TeamId: int64(args.Input.TeamId),
+		UserId: int64(args.Input.UserId),
+	}
+	err := Aggregator(ctx).DeleteTeamMember(ctx, member)
+	return &TeamMemberResolver{err == nil}, errors.Wrapf(err, "error deleting team member")
+}
 
-type AddChannelMemberInput struct {
+type ChannelMemberInput struct {
 	ChannelId int32
 	UserId    int32
 }
 
-type AddChannelMemberResolver struct {
-	Ok bool
+type ChannelMemberResolver struct {
+	ok bool
 }
 
-func (t *AddChannelResolver) Ok() boolean {
-	return t.Ok
+func (t *ChannelMemberResolver) Ok() bool {
+	return t.ok
 }
 
 func (t *Mutation) AddChannelMember(ctx context.Context, args struct {
-	Input AddChannelInput
-}) (*AddChannelMessageResolver, error) {
+	Input ChannelMemberInput
+}) (*ChannelMemberResolver, error) {
+	member := &domain.ChannelMember{
+		ChannelId: int64(args.Input.ChannelId),
+		UserId:    int64(args.Input.UserId),
+	}
+	err := Aggregator(ctx).AddChannelMember(ctx, member)
+	return &ChannelMemberResolver{err == nil}, errors.Wrapf(err, "error adding channel member")
+}
+
+func (t *Mutation) DeleteChannelMember(ctx context.Context, args struct {
+	Input ChannelMemberInput
+}) (*ChannelMemberResolver, error) {
+	member := &domain.ChannelMember{
+		ChannelId: int64(args.Input.ChannelId),
+		UserId:    int64(args.Input.UserId),
+	}
+	err := Aggregator(ctx).DeleteChannelMember(ctx, member)
+	return &ChannelMemberResolver{err == nil}, errors.Wrapf(err, "error deleting channel member")
 }

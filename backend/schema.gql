@@ -67,12 +67,12 @@ input CreateChannelInput {
 	isPublic: Boolean!
 }
 
-input AddTeamMemberInput {
+input TeamMemberInput {
 	teamId: Int!
 	userId: Int!
 }
 
-input AddChannelMemberInput {
+input ChannelMemberInput {
 	channelId: Int!
 	userId: Int!
 }
@@ -93,11 +93,11 @@ type SendMessageOutput {
 	ok: Boolean!
 }
 
-type AddTeamMemberOutput {
+type TeamMemberOutput {
 	ok: Boolean!
 }
 
-type AddChannelMemberOutput {
+type ChannelMemberOutput {
 	ok: Boolean!
 }
 
@@ -106,10 +106,13 @@ type Mutation {
 	createTeam(input: CreateTeamInput!): CreateTeamOutput!
 	createChannel(input: CreateChannelInput!): CreateChannelOutput!
 
-	# addTeamMember(input: AddTeamMemberInput!): AddTeamMemberOutput!
-	# addChannelMember(input: AddChannelMemberInput!): AddChannelMemberOutput!
+	addTeamMember(input: TeamMemberInput!): TeamMemberOutput!
+	deleteTeamMember(input: TeamMemberInput!): TeamMemberOutput!
 
-	# sendMessage(input: SendMessageInput!): SendMessageOutput!
+	addChannelMember(input: ChannelMemberInput!): ChannelMemberOutput!
+	deleteChannelMember(input: ChannelMemberInput!): ChannelMemberOutput!
+
+	sendMessage(input: SendMessageInput!): SendMessageOutput!
 }
 
 schema {

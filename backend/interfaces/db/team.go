@@ -41,6 +41,14 @@ const UpdateTeam = `
 UPDATE team SET owner_id = $2, name = $3 WHERE id = $1
 `
 
+const InsertTeamMember = `
+INSERT INTO team_member (team_id, user_id) VALUES ($1 , $2)
+`
+
+const DeleteTeamMember = `
+DELETE FROM team_member WHERE team_id = $1 AND user_id = $2
+`
+
 type TeamDB struct {
 	db db.DBHandler
 }
@@ -79,4 +87,24 @@ func (t *TeamDB) CreateTeam(ctx context.Context, team *domain.Team) (*domain.Tea
 	)
 	team.Id = id
 	return team, errors.Wrapf(err, "unable to insert team")
+}
+
+func (t *TeamDB) AddTeamMember(ctx context.Context, member *domain.TeamMember) error {
+	err := t.db.Insert(
+		ctx,
+		InsertTeamMember,
+		member.TeamId,
+		member.UserId,
+	)
+	return errors.Wrap(err, "unabled to insert team member")
+}
+
+func (t *TeamDB) DeleteTeamMember(ctx context.Context, member *domain.TeamMember) error {
+	_, err := t.db.Delete(
+		ctx,
+		DeleteTeamMember,
+		member.TeamId,
+		member.UserId,
+	)
+	return errors.Wrap(err, "unabled to delete team member")
 }
