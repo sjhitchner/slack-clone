@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"log"
 
 	"github.com/pkg/errors"
 
@@ -16,18 +17,17 @@ SELECT
   , channel_id
   , text
   , timestamp
-FROM message
-`
+FROM message`
 
-const SelectMessageById = `
+const SelectMessageById = SelectMessage + `
 WHERE id = $1
 `
 
-const SelectMessagesByUserId = `
+const SelectMessagesByUserId = SelectMessage + `
 WHERE user_id = $1
 `
 
-const SelectMessagesByChannelId = `
+const SelectMessagesByChannelId = SelectMessage + `
 WHERE channel_id = $1
 `
 
@@ -52,24 +52,32 @@ func NewMessageDB(db db.DBHandler) *MessageDB {
 }
 
 func (t *MessageDB) GetMessageById(ctx context.Context, id int64) (*domain.Message, error) {
+	log.Println(SelectMessageById)
+
 	var obj domain.Message
 	err := t.db.GetById(ctx, &obj, SelectMessageById, id)
 	return &obj, errors.Wrapf(err, "error getting message '%d'", id)
 }
 
 func (t *MessageDB) ListMessagesByUserId(ctx context.Context, userId int64) ([]*domain.Message, error) {
+	log.Println(SelectMessagesByUserId)
+
 	var list []*domain.Message
 	err := t.db.Select(ctx, &list, SelectMessagesByUserId, userId)
 	return list, errors.Wrapf(err, "error getting messages by user '%d'", userId)
 }
 
 func (t *MessageDB) ListMessagesByChannelId(ctx context.Context, channelId int64) ([]*domain.Message, error) {
+	log.Println(SelectMessagesByChannelId)
+
 	var list []*domain.Message
 	err := t.db.Select(ctx, &list, SelectMessagesByChannelId, channelId)
 	return list, errors.Wrapf(err, "error getting messages by channel '%d'", channelId)
 }
 
 func (t *MessageDB) SendMessage(ctx context.Context, message *domain.Message) error {
+	log.Println(InsertMessage)
+
 	err := t.db.Insert(
 		ctx,
 		InsertMessage,

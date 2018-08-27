@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"log"
 
 	"github.com/pkg/errors"
 
@@ -11,13 +12,12 @@ import (
 
 const SelectChannel = `
 SELECT
-	channel.id id
+    channel.id id
   , channel.team_id team_id
   , channel.owner_id owner_id
   , channel.name name
   , channel.is_public is_public
-FROM channel
-`
+FROM channel`
 
 const SelectChannelById = SelectChannel + `
 WHERE channel.id = $1
@@ -61,18 +61,24 @@ func NewChannelDB(db db.DBHandler) *ChannelDB {
 }
 
 func (t *ChannelDB) GetChannelById(ctx context.Context, id int64) (*domain.Channel, error) {
+	log.Println(SelectChannelById)
+
 	var obj domain.Channel
 	err := t.db.GetById(ctx, &obj, SelectChannelById, id)
 	return &obj, errors.Wrapf(err, "error getting channel '%d'", id)
 }
 
 func (t *ChannelDB) ListChannelsByTeamId(ctx context.Context, teamId int64) ([]*domain.Channel, error) {
+	log.Println(SelectChannelsByTeamId)
+
 	var list []*domain.Channel
 	err := t.db.Select(ctx, &list, SelectChannelsByTeamId, teamId)
 	return list, errors.Wrapf(err, "error getting channels by team '%d'", teamId)
 }
 
 func (t *ChannelDB) CreateChannel(ctx context.Context, channel *domain.Channel) (*domain.Channel, error) {
+	log.Println(InsertChannel)
+
 	id, err := t.db.InsertWithId(
 		ctx,
 		InsertChannel,
@@ -86,6 +92,8 @@ func (t *ChannelDB) CreateChannel(ctx context.Context, channel *domain.Channel) 
 }
 
 func (t *ChannelDB) AddChannelMember(ctx context.Context, member *domain.ChannelMember) error {
+	log.Println(InsertChannelMember)
+
 	err := t.db.Insert(
 		ctx,
 		InsertChannelMember,
@@ -96,6 +104,8 @@ func (t *ChannelDB) AddChannelMember(ctx context.Context, member *domain.Channel
 }
 
 func (t *ChannelDB) DeleteChannelMember(ctx context.Context, member *domain.ChannelMember) error {
+	log.Println(DeleteChannelMember)
+
 	_, err := t.db.Delete(
 		ctx,
 		DeleteChannelMember,

@@ -45,6 +45,12 @@ func (t *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		params.Variables,
 	)
 
+	if len(response.Errors) > 0 {
+		for _, err := range response.Errors {
+			log.Printf("%+v\n", err)
+		}
+	}
+
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

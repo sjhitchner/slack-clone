@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"log"
 
 	"github.com/pkg/errors"
 
@@ -15,8 +16,7 @@ SELECT
   , user.username username
   , user.email email
   , user.password password
-FROM user 
-`
+FROM user`
 
 const SelectUserById = SelectUser + `
 WHERE user.id = $1
@@ -37,7 +37,7 @@ WHERE team_member.team_id = $1
 
 const SelectUsersByChannelId = SelectUser + `
 JOIN channel_member ON channel_member.user_id = user.id
-WHERE channel_member.user_id = $1
+WHERE channel_member.channel_id = $1
 `
 
 const InsertUser = `
@@ -65,36 +65,56 @@ func NewUserDB(db db.DBHandler) *UserDB {
 }
 
 func (t *UserDB) GetUserById(ctx context.Context, id int64) (*domain.User, error) {
+	log.Println(SelectUserById)
+
 	var obj domain.User
 	err := t.db.GetById(ctx, &obj, SelectUserById, id)
 	return &obj, errors.Wrapf(err, "error getting user '%d'", id)
 }
 
 func (t *UserDB) GetUserByUsername(ctx context.Context, username string) (*domain.User, error) {
+	log.Println(SelectUserByUsername)
+
 	var obj domain.User
 	err := t.db.GetById(ctx, &obj, SelectUserByUsername, username)
 	return &obj, errors.Wrapf(err, "error getting user by username '%d'", username)
 }
 
 func (t *UserDB) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	log.Println(SelectUserByEmail)
+
 	var obj domain.User
 	err := t.db.GetById(ctx, &obj, SelectUserByEmail, email)
 	return &obj, errors.Wrapf(err, "error getting user by email '%s'", email)
 }
 
+func (t *UserDB) ListUsers(ctx context.Context) ([]*domain.User, error) {
+	log.Println(SelectUser)
+
+	var list []*domain.User
+	err := t.db.Select(ctx, &list, SelectUser)
+	return list, errors.Wrapf(err, "error getting users")
+}
+
 func (t *UserDB) ListUsersByTeamId(ctx context.Context, teamId int64) ([]*domain.User, error) {
+	log.Println(SelectUsersByTeamId)
+
 	var list []*domain.User
 	err := t.db.Select(ctx, &list, SelectUsersByTeamId, teamId)
 	return list, errors.Wrapf(err, "error getting users by team '%d'", teamId)
 }
 
 func (t *UserDB) ListUsersByChannelId(ctx context.Context, channelId int64) ([]*domain.User, error) {
+	log.Println(SelectUsersByChannelId)
+
 	var list []*domain.User
 	err := t.db.Select(ctx, &list, SelectUsersByChannelId, channelId)
 	return list, errors.Wrapf(err, "error getting users by channel '%d'", channelId)
 }
 
 func (t *UserDB) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
+	log.Println(InsertUser)
+
 	id, err := t.db.InsertWithId(
 		ctx,
 		InsertUser,

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 )
 
@@ -73,6 +74,7 @@ type UserRepo interface {
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 
+	ListUsers(ctx context.Context) ([]*User, error)
 	ListUsersByTeamId(ctx context.Context, teamId int64) ([]*User, error)
 	ListUsersByChannelId(ctx context.Context, channelId int64) ([]*User, error)
 
@@ -93,4 +95,52 @@ type Aggregator interface {
 	ChannelRepo
 	UserRepo
 	MessageRepo
+}
+
+func (t User) String() string {
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+
+func (t Team) String() string {
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+
+func (t Channel) String() string {
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+
+func (t ChannelMember) String() string {
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+
+func (t TeamMember) String() string {
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+
+func (t Message) String() string {
+	b, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
 }

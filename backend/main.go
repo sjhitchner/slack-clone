@@ -80,11 +80,20 @@ func CheckError(err error) {
 func InitializeDBSchema(dbh libdb.DBHandler) error {
 
 	schema := `
+CREATE TABLE IF NOT EXISTS user (
+	id INTEGER PRIMARY KEY AUTOINCREMENT
+	, username TEXT NOT NULL UNIQUE
+	, email TEXT NOT NULL UNIQUE 
+	, password TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS team (
 	id INTEGER PRIMARY KEY AUTOINCREMENT
 	, owner_id INTEGER NOT NULL
-	, name TEXT NOT NULL
+	, name TEXT NOT NULL 
 	, FOREIGN KEY (owner_id) REFERENCES user(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
+   , UNIQUE(name)
 );
 
 CREATE TABLE IF NOT EXISTS channel (
@@ -94,14 +103,32 @@ CREATE TABLE IF NOT EXISTS channel (
 	, name TEXT NOT NULL
 	, is_public BOOLEAN NOT NULL
 	, FOREIGN KEY (team_id) REFERENCES team(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
 	, FOREIGN KEY (owner_id) REFERENCES user(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
+   , UNIQUE(team_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS team_member (
 	id INTEGER PRIMARY KEY AUTOINCREMENT
-	, username TEXT NOT NULL
-	, email TEXT NOT NULL
-	, password TEXT NOT NULL
+	, team_id INTEGER NOT NULL
+	, user_id INTEGER NOT NULL
+	, FOREIGN KEY (team_id) REFERENCES team(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
+	, FOREIGN KEY (user_id) REFERENCES user(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
+   , UNIQUE(team_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS channel_member (
+	id INTEGER PRIMARY KEY AUTOINCREMENT
+	, channel_id INTEGER NOT NULL
+	, user_id INTEGER NOT NULL
+	, FOREIGN KEY (channel_id) REFERENCES channel(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
+	, FOREIGN KEY (user_id) REFERENCES user(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
+   , UNIQUE(channel_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS message (
@@ -111,24 +138,80 @@ CREATE TABLE IF NOT EXISTS message (
 	, text TEXT NOT NULL
 	, timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, FOREIGN KEY (user_id) REFERENCES user(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
 	, FOREIGN KEY (channel_id) REFERENCES channel(id)
+	    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS team_member (
-	id INTEGER PRIMARY KEY AUTOINCREMENT
-	, team_id INTEGER NOT NULL
-	, user_id INTEGER NOT NULL
-	, FOREIGN KEY (team_id) REFERENCES team(id)
-	, FOREIGN KEY (user_id) REFERENCES user(id)
-);
+CREATE TRIGGER IF NOT EXISTS validate_channel BEFORE INSERT ON channel
+BEGIN
+  SELECT CASE
+  WHEN (
+    (
+      SELECT COUNT(*) FROM team_member 
+      WHERE user_id = NEW.owner_id 
+       AND team_id = NEW.team_id
+	 ) ISNULL
+  )
+  THEN RAISE(ABORT, "owner_id not a team member")
+  END;
+END;
 
-CREATE TABLE IF NOT EXISTS channel_member (
-	id INTEGER PRIMARY KEY AUTOINCREMENT
-	, channel_id INTEGER NOT NULL
-	, user_id INTEGER NOT NULL
-	, FOREIGN KEY (channel_id) REFERENCES channel(id)
-	, FOREIGN KEY (user_id) REFERENCES user(id)
-);
+CREATE TRIGGER IF NOT EXISTS validate_channel_member BEFORE INSERT ON channel_member
+BEGIN
+  SELECT CASE
+  WHEN (
+    (
+      SELECT COUNT(*)
+		FROM team_member tm
+		JOIN channel c ON c.team_id = tm.team_id
+      WHERE tm.user_id = NEW.user_id 
+	    AND c.id = NEW.channel_id
+	 ) ISNULL
+  )
+  THEN RAISE(ABORT, "user_id not a team member")
+  END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS validate_message BEFORE INSERT ON message
+BEGIN
+  SELECT CASE
+  WHEN (
+    (
+      SELECT COUNT(*)
+		FROM team_member tm
+		JOIN channel c ON c.team_id = tm.team_id
+      WHERE tm.user_id = NEW.user_id 
+	    AND c.id = NEW.channel_id
+	 ) ISNULL
+  )
+  THEN RAISE(ABORT, "user_id not a team member")
+  END;
+END;
+
+INSERT INTO user (id, username, email, password) VALUES
+    (1, "steve", "steve@steve.com", "qwerty")
+  , (2, "simon", "simon@steve.com", "qwerty");
+
+INSERT INTO team (id, name, owner_id) VALUES
+	 (1, "Team Steve", 1)
+  , (2, "Team Simon", 2);
+
+INSERT INTO channel (id, name, team_id, owner_id, is_public) VALUES
+	 (1, "SteveTalk", 1, 1, false)
+  , (2, "SimonTalk", 2, 2, true);
+
+INSERT INTO team_member (user_id, team_id) VALUES
+    (1, 1)
+  , (1, 2)
+  , (2, 1)
+  , (2, 2);
+
+INSERT INTO channel_member (user_id, channel_id) VALUES
+    (1, 1)
+  , (1, 2)
+  , (2, 1)
+  , (2, 2);
 `
 
 	if _, err := dbh.DB().Exec(schema); err != nil {

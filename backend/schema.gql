@@ -32,7 +32,9 @@ type User {
 }
 
 type Query {
-    ping: String!
+	ping: String!
+
+	userList: [User!]!
 
 	userTeamList(userId: Int!): [Team!]!
 	channelMessageList(channelId: Int!): [Message!]!

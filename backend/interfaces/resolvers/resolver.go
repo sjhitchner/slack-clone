@@ -9,6 +9,10 @@ import (
 	"github.com/sjhitchner/slack-clone/backend/domain"
 )
 
+func Aggregator(ctx context.Context) domain.Aggregator {
+	return ctx.Value("agg").(domain.Aggregator)
+}
+
 type Resolver struct {
 	*Mutation
 }
@@ -74,6 +78,12 @@ func (t *Resolver) User(ctx context.Context, args struct {
 	return &UserResolver{obj}, errors.Wrapf(err, "error getting user %d", args.Id)
 }
 
-func Aggregator(ctx context.Context) domain.Aggregator {
-	return ctx.Value("agg").(domain.Aggregator)
+func (t *Resolver) UserList(ctx context.Context) ([]*UserResolver, error) {
+	list, err := Aggregator(ctx).ListUsers(ctx)
+
+	resolvers := make([]*UserResolver, len(list))
+	for i := range resolvers {
+		resolvers[i] = &UserResolver{list[i]}
+	}
+	return resolvers, errors.Wrapf(err, "error getting users")
 }
