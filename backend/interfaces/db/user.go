@@ -6,8 +6,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/sjhitchner/graphql-resolver/lib/db"
 	"github.com/sjhitchner/slack-clone/backend/domain"
+	"github.com/sjhitchner/slack-clone/backend/infrastructure/db"
 )
 
 const SelectUser = `

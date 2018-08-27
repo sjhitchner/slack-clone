@@ -10,13 +10,12 @@ import (
 
 	// "github.com/graph-gophers/graphql-go"
 	"github.com/sjhitchner/slack-clone/backend/domain"
+	libdb "github.com/sjhitchner/slack-clone/backend/infrastructure/db"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/db"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/graphql"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/resolvers"
-
-	libdb "github.com/sjhitchner/graphql-resolver/lib/db"
-	//libsql "github.com/sjhitchner/graphql-resolver/lib/db/psql"
-	libsql "github.com/sjhitchner/graphql-resolver/lib/db/sqlite"
+	//libsql "github.com/sjhitchner/slack-clone/backend/infrastructure/db/psql"
+	libsql "github.com/sjhitchner/slack-clone/backend/infrastructure/db/sqlite"
 )
 
 // https://github.com/graph-gophers/dataloader
@@ -48,6 +47,17 @@ func main() {
 	schema, err := ioutil.ReadFile(schemaPath)
 	CheckError(err)
 
+	handler, err := SetupHandler(dbh, string(schema))
+	CheckError(err)
+
+	http.Handle("/graphql", handler)
+	http.Handle("/", graphql.NewGraphiQLHandler(string(schema)))
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func SetupHandler(dbh libdb.DBHandler, schema string) (http.Handler, error) {
+
 	aggregator := struct {
 		domain.UserRepo
 		domain.TeamRepo
@@ -65,10 +75,7 @@ func main() {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "agg", aggregator)
 
-	http.Handle("/graphql", graphql.WrapContext(ctx, handler))
-	http.Handle("/", graphql.NewGraphiQLHandler(string(schema)))
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	return graphql.WrapContext(ctx, handler), nil
 }
 
 func CheckError(err error) {
@@ -82,9 +89,11 @@ func InitializeDBSchema(dbh libdb.DBHandler) error {
 	schema := `
 CREATE TABLE IF NOT EXISTS user (
 	id INTEGER PRIMARY KEY AUTOINCREMENT
-	, username TEXT NOT NULL UNIQUE
-	, email TEXT NOT NULL UNIQUE 
+	, username TEXT NOT NULL
+	, email TEXT NOT NULL
 	, password TEXT NOT NULL
+	, UNIQUE(username)
+	, UNIQUE(email)
 );
 
 CREATE TABLE IF NOT EXISTS team (
@@ -194,11 +203,11 @@ INSERT INTO user (id, username, email, password) VALUES
   , (2, "simon", "simon@steve.com", "qwerty");
 
 INSERT INTO team (id, name, owner_id) VALUES
-	 (1, "Team Steve", 1)
+    (1, "Team Steve", 1)
   , (2, "Team Simon", 2);
 
 INSERT INTO channel (id, name, team_id, owner_id, is_public) VALUES
-	 (1, "SteveTalk", 1, 1, false)
+    (1, "SteveTalk", 1, 1, false)
   , (2, "SimonTalk", 2, 2, true);
 
 INSERT INTO team_member (user_id, team_id) VALUES
