@@ -14,7 +14,7 @@ type TeamResolver struct {
 }
 
 func (t *TeamResolver) Id() graphql.ID {
-	return graphql.ID(t.obj.Id)
+	return ToID(t.obj.Id)
 }
 
 func (t *TeamResolver) Name() string {

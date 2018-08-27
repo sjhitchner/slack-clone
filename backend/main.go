@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	// "github.com/graph-gophers/graphql-go"
 	"github.com/sjhitchner/slack-clone/backend/domain"
 	libdb "github.com/sjhitchner/slack-clone/backend/infrastructure/db"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/db"
@@ -200,27 +199,34 @@ END;
 
 INSERT INTO user (id, username, email, password) VALUES
     (1, "steve", "steve@steve.com", "qwerty")
-  , (2, "simon", "simon@steve.com", "qwerty");
+  , (2, "simon", "simon@steve.com", "qwerty")
+  , (3, "matt", "matt@steve.com", "qwerty");
 
 INSERT INTO team (id, name, owner_id) VALUES
     (1, "Team Steve", 1)
-  , (2, "Team Simon", 2);
+  , (2, "Team Simon", 2)
+  , (3, "Team Matt", 3);
 
 INSERT INTO channel (id, name, team_id, owner_id, is_public) VALUES
     (1, "SteveTalk", 1, 1, false)
-  , (2, "SimonTalk", 2, 2, true);
+  , (2, "SimonTalk", 2, 2, true)
+  , (3, "MattTalk", 3, 3, true);
 
-INSERT INTO team_member (user_id, team_id) VALUES
+INSERT INTO team_member (team_id, user_id) VALUES
     (1, 1)
   , (1, 2)
-  , (2, 1)
-  , (2, 2);
+  , (2, 2)
+  , (2, 3)
+  , (3, 1)
+  , (3, 3);
 
-INSERT INTO channel_member (user_id, channel_id) VALUES
+INSERT INTO channel_member (channel_id, user_id) VALUES
     (1, 1)
   , (1, 2)
-  , (2, 1)
-  , (2, 2);
+  , (2, 2)
+  , (2, 3)
+  , (3, 1)
+  , (3, 3);
 `
 
 	if _, err := dbh.DB().Exec(schema); err != nil {

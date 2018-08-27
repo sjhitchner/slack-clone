@@ -115,10 +115,10 @@ func (s *MainSuite) Test_UserTeamListQuery(c *C) {
 	c.Assert(list1.Channels[0].Name, Equals, "SteveTalk")
 
 	list2 := v.Data.UserTeamList[1]
-	c.Assert(list2.Name, Equals, "Team Simon")
-	c.Assert(list2.Owner.Username, Equals, "simon")
+	c.Assert(list2.Name, Equals, "Team Matt")
+	c.Assert(list2.Owner.Username, Equals, "matt")
 	c.Assert(list2.Channels, HasLen, 1)
-	c.Assert(list2.Channels[0].Name, Equals, "SimonTalk")
+	c.Assert(list2.Channels[0].Name, Equals, "MattTalk")
 }
 
 func (s *MainSuite) RunQuery(c *C, queryStr string, v interface{}) {

@@ -36,13 +36,13 @@ type Query {
 
 	userList: [User!]!
 
-	userTeamList(userId: Int!): [Team!]!
-	channelMessageList(channelId: Int!): [Message!]!
-	teamChannelList(teamId: Int!): [Channel!]!
+	userTeamList(userId: ID!): [Team!]!
+	channelMessageList(channelId: ID!): [Message!]!
+	teamChannelList(teamId: ID!): [Channel!]!
 
-	team(id: Int!): Team!
-	channel(id: Int!): Channel!
-	user(id: Int!): User!
+	team(id: ID!): Team!
+	channel(id: ID!): Channel!
+	user(id: ID!): User!
 }
 
 input CreateUserInput {
@@ -52,31 +52,31 @@ input CreateUserInput {
 }
 
 input SendMessageInput {
-	userId: Int!
-	channelId: Int!
+	userId: ID!
+	channelId: ID!
 	text: String!
 }
 
 input CreateTeamInput {
 	name: String!
-	ownerId: Int!
+	ownerId: ID!
 }
 
 input CreateChannelInput {
-	teamId: Int!
-	ownerId: Int!
+	teamId: ID!
+	ownerId: ID!
 	name: String!
 	isPublic: Boolean!
 }
 
 input TeamMemberInput {
-	teamId: Int!
-	userId: Int!
+	teamId: ID!
+	userId: ID!
 }
 
 input ChannelMemberInput {
-	channelId: Int!
-	userId: Int!
+	channelId: ID!
+	userId: ID!
 }
 
 type CreateUserOutput {

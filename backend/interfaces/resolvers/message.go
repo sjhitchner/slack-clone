@@ -15,7 +15,7 @@ type MessageResolver struct {
 }
 
 func (t *MessageResolver) Id() graphql.ID {
-	return graphql.ID(t.obj.Id)
+	return ToID(t.obj.Id)
 }
 
 func (t *MessageResolver) Text() string {

@@ -14,7 +14,7 @@ type UserResolver struct {
 }
 
 func (t *UserResolver) Id() graphql.ID {
-	return graphql.ID(t.obj.Id)
+	return ToID(t.obj.Id)
 }
 
 func (t *UserResolver) Username() string {

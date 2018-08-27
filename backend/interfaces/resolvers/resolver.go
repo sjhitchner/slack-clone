@@ -2,7 +2,9 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/graph-gophers/graphql-go"
 	"github.com/pkg/errors"
 
 	//"github.com/sjhitchner/graphql-resolver/lib/db"
@@ -11,6 +13,10 @@ import (
 
 func Aggregator(ctx context.Context) domain.Aggregator {
 	return ctx.Value("agg").(domain.Aggregator)
+}
+
+func ToID(i int64) graphql.ID {
+	return graphql.ID(fmt.Sprintf("%d", i))
 }
 
 type Resolver struct {

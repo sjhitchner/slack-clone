@@ -14,7 +14,7 @@ type ChannelResolver struct {
 }
 
 func (t *ChannelResolver) Id() graphql.ID {
-	return graphql.ID(t.obj.Id)
+	return ToID(t.obj.Id)
 }
 
 func (t *ChannelResolver) Name() string {
