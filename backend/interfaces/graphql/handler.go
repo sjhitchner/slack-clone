@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/http/httputil"
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/example/starwars"
@@ -22,6 +23,21 @@ func NewHandler(schema string, resolver interface{}) *Handler {
 
 func (t *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("Serve GraphQL Request")
+
+	b, _ := httputil.DumpRequest(r, true)
+	log.Println(string(b))
+	log.Println()
+
+	if origin := r.Header.Get("Origin"); origin != "" {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+	}
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, HEAD")
+
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+		return
+	}
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding")
 
 	var params struct {
 		Query         string                 `json:"query"`
