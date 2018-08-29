@@ -3,8 +3,14 @@ package domain
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
+	"unicode"
 )
+
+type Validator interface {
+	Validate() error
+}
 
 type Team struct {
 	Id      int64  `db:"id"`
@@ -41,10 +47,88 @@ type Message struct {
 }
 
 type User struct {
-	Id       int64  `db:"id"`
-	Username string `db:"username"`
-	Email    string `db:"email"`
-	Password string `db:"password"`
+	Id       int64    `db:"id"`
+	Username Username `db:"username"`
+	Email    Email    `db:"email"`
+	Password Password `db:"password"`
+}
+
+// TODO multi errors?
+func (t User) Validate() error {
+	//err := make([]error, 0, 3)
+	//err = append(err, t.Username.Validate()...)
+	//err = append(err, t.Email.Validate()...)
+	//err = append(err, t.Password.Validate()...)
+	if err := t.Username.Validate(); err != nil {
+		return err
+	}
+
+	if err := t.Email.Validate(); err != nil {
+		return err
+	}
+
+	if err := t.Password.Validate(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// TODO add validation
+//go:generate sqltype -type=Username -primative=string
+type Username string
+
+func (t Username) String() string { return string(t) }
+
+func (t Username) Validate() error {
+
+	if len(t) < 3 {
+		return NewValidationError("username", "too short")
+	}
+
+	if !IsAlphanumeric(string(t)) {
+		return NewValidationError("username", "not alphanumeric")
+	}
+
+	return nil
+}
+
+//go:generate sqltype -type=Email -primative=string
+type Email string
+
+func (t Email) String() string { return string(t) }
+
+func (t Email) Validate() error {
+	if len(t) == 0 {
+		return NewValidationError("email", "email is empty")
+	}
+	return nil
+}
+
+//go:generate sqltype -type=Password -primative=string
+type Password string
+
+func (t Password) String() string { return string(t) }
+
+func (t Password) Validate() error {
+	if len(t) == 0 {
+		return NewValidationError("password", "password is empty")
+	}
+
+	return nil
+}
+
+type ValidationError struct {
+	Field   string
+	Message string
+}
+
+func NewValidationError(field, message string) *ValidationError {
+	return &ValidationError{field, message}
+}
+
+func (t ValidationError) Error() string {
+	return fmt.Sprintf(`%s: "%s"`, t.Field, t.Message)
 }
 
 type TeamRepo interface {
@@ -143,4 +227,13 @@ func (t Message) String() string {
 		return err.Error()
 	}
 	return string(b)
+}
+
+func IsAlphanumeric(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }

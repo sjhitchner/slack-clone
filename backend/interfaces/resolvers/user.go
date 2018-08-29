@@ -13,20 +13,27 @@ type UserResolver struct {
 	obj *domain.User
 }
 
+func NewUserResolver(obj *domain.User) *UserResolver {
+	if obj == nil {
+		return nil
+	}
+	return &UserResolver{obj}
+}
+
 func (t *UserResolver) Id() graphql.ID {
 	return ToID(t.obj.Id)
 }
 
 func (t *UserResolver) Username() string {
-	return t.obj.Username
+	return t.obj.Username.String()
 }
 
 func (t *UserResolver) Email() string {
-	return t.obj.Email
+	return t.obj.Email.String()
 }
 
 func (t *UserResolver) Password() string {
-	return t.obj.Password
+	return t.obj.Password.String()
 }
 
 func (t *UserResolver) Teams(ctx context.Context) ([]*TeamResolver, error) {

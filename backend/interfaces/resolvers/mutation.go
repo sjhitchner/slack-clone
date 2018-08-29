@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	//"github.com/sjhitchner/graphql-resolver/lib/db"
 	"github.com/sjhitchner/slack-clone/backend/domain"
 )
 
@@ -19,11 +18,29 @@ type CreateUserInput struct {
 }
 
 type CreateUserResolver struct {
-	obj *domain.User
+	ok     bool
+	obj    *domain.User
+	errors []error
+}
+
+func NewCreateUserResolver(ok bool, user *domain.User, err ...error) *CreateUserResolver {
+	return &CreateUserResolver{
+		len(err) == 0,
+		user,
+		err,
+	}
+}
+
+func (t *CreateUserResolver) Ok() bool {
+	return t.ok
 }
 
 func (t *CreateUserResolver) User(ctx context.Context) (*UserResolver, error) {
-	return &UserResolver{t.obj}, nil
+	return NewUserResolver(t.obj), nil
+}
+
+func (t *CreateUserResolver) Errors() *[]*ErrorResolver {
+	return Errors(t.errors...)
 }
 
 func (t *Mutation) CreateUser(ctx context.Context, args struct {
@@ -31,13 +48,19 @@ func (t *Mutation) CreateUser(ctx context.Context, args struct {
 }) (*CreateUserResolver, error) {
 
 	user := &domain.User{
-		Username: args.Input.Username,
-		Email:    args.Input.Email,
-		Password: args.Input.Password,
+		Username: domain.Username(args.Input.Username),
+		Email:    domain.Email(args.Input.Email),
+		Password: domain.Password(args.Input.Password),
+	}
+
+	// TODO Move this to an Interactor
+	if err := user.Validate(); err != nil {
+		return NewCreateUserResolver(false, nil, err), nil
 	}
 
 	user, err := Aggregator(ctx).CreateUser(ctx, user)
-	return &CreateUserResolver{user}, errors.Wrapf(err, "error creating user")
+	return NewCreateUserResolver(err == nil, user, err), nil
+	//}, errors.Wrapf(err, "error creating user")
 }
 
 type CreateTeamInput struct {

@@ -79,8 +79,16 @@ input ChannelMemberInput {
 	userId: ID!
 }
 
+type Error {
+	type: String!
+	field: String!
+	message: String!
+}
+
 type CreateUserOutput {
-	user: User!
+	ok: Boolean!
+	user: User
+	errors: [Error!]
 }
 
 type CreateTeamOutput {
