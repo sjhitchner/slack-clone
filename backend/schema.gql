@@ -92,11 +92,15 @@ type CreateUserOutput {
 }
 
 type CreateTeamOutput {
+	ok: Boolean!
 	team: Team!
+	errors: [Error!]
 }
 
 type CreateChannelOutput {
+	ok: Boolean!
 	channel: Channel!
+	errors: [Error!]
 }
 
 type SendMessageOutput {

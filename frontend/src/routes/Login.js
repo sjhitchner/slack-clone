@@ -3,26 +3,23 @@ import { Message, Button, Input, Container, Header } from 'semantic-ui-react';
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 
-class Register extends React.Component {
+class Login extends React.Component {
   state = {
-    username: '',
     email: '',
     password: '',
-	usernameError: '',
 	emailError: '',
 	passwordError: '',
   };
 
   onSubmit = async () => {
 	this.setState({
-		usernameError: '',
 		emailError: '',
 		passwordError: '',
 	});
 
-    const {username, email, password} = this.state;
+    const {email, password} = this.state;
 	const response = await this.props.mutate({
-      variables: {username, email, password},
+      variables: {email, password},
     });
 
     console.log(response);
@@ -46,13 +43,9 @@ class Register extends React.Component {
   };
 
   render() {
-    const { username, email, password, usernameError, emailError, passwordError } = this.state;
+    const {email, password, emailError, passwordError } = this.state;
 
 	const errorList = [];
-
-	if (usernameError) {
-		errorList.push(usernameError);
-	}
 
 	if (emailError) {
 		errorList.push(emailError);
@@ -65,17 +58,9 @@ class Register extends React.Component {
     return (
       <Container text>
         <Header as="h2">Register</Header>
-		{ usernameError || emailError || passwordError ? (
-			<Message error header="Registration Errors" list={errorList} />
+		{ emailError || passwordError ? (
+			<Message error header="Login Errors" list={errorList} />
 		) : null}
-        <Input
-          name="username"
-		  error={!!usernameError}
-          onChange={this.onChange}
-          value={username}
-          placeholder="Username"
-          fluid
-        />
         <Input
 		  name="email"
 		  error={!!emailError}
@@ -99,21 +84,4 @@ class Register extends React.Component {
   }
 }
 
-const registerMutation = gql`
-  mutation($username: String!, $email: String!, $password: String!) {
-    createUser(input: {
-		username: $username,
-		email: $email,
-		password: $password
-	}) {
-	  ok
-	  errors {
-	    type
-		field
-		message
-	  }
-	}
-  }
-`;
-
-export default graphql(registerMutation)(Register);
+export default Login;

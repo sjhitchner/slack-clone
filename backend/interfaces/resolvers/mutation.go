@@ -18,21 +18,19 @@ type CreateUserInput struct {
 }
 
 type CreateUserResolver struct {
-	ok     bool
 	obj    *domain.User
 	errors []error
 }
 
-func NewCreateUserResolver(ok bool, user *domain.User, err ...error) *CreateUserResolver {
+func NewCreateUserResolver(user *domain.User, err ...error) *CreateUserResolver {
 	return &CreateUserResolver{
-		len(err) == 0,
 		user,
 		err,
 	}
 }
 
 func (t *CreateUserResolver) Ok() bool {
-	return t.ok
+	return len(t.errors) == 0
 }
 
 func (t *CreateUserResolver) User(ctx context.Context) (*UserResolver, error) {
@@ -55,11 +53,11 @@ func (t *Mutation) CreateUser(ctx context.Context, args struct {
 
 	// TODO Move this to an Interactor
 	if err := user.Validate(); err != nil {
-		return NewCreateUserResolver(false, nil, err), nil
+		return NewCreateUserResolver(nil, err), nil
 	}
 
 	user, err := Aggregator(ctx).CreateUser(ctx, user)
-	return NewCreateUserResolver(err == nil, user, err), nil
+	return NewCreateUserResolver(user, err), nil
 	//}, errors.Wrapf(err, "error creating user")
 }
 
@@ -69,11 +67,27 @@ type CreateTeamInput struct {
 }
 
 type CreateTeamResolver struct {
-	obj *domain.Team
+	obj    *domain.Team
+	errors []error
+}
+
+func NewCreateTeamResolver(team *domain.Team, err ...error) *CreateTeamResolver {
+	return &CreateTeamResolver{
+		team,
+		err,
+	}
+}
+
+func (t *CreateTeamResolver) Ok(ctx context.Context) bool {
+	return len(t.errors) == 0
 }
 
 func (t *CreateTeamResolver) Team(ctx context.Context) (*TeamResolver, error) {
 	return &TeamResolver{t.obj}, nil
+}
+
+func (t *CreateTeamResolver) Errors() *[]*ErrorResolver {
+	return Errors(t.errors...)
 }
 
 func (t *Mutation) CreateTeam(ctx context.Context, args struct {
@@ -86,7 +100,8 @@ func (t *Mutation) CreateTeam(ctx context.Context, args struct {
 	}
 
 	team, err := Aggregator(ctx).CreateTeam(ctx, team)
-	return &CreateTeamResolver{team}, errors.Wrapf(err, "error creating team")
+	return NewCreateTeamResolver(team, err), nil
+	//, errors.Wrapf(err, "error creating team")
 }
 
 type CreateChannelInput struct {
@@ -97,11 +112,27 @@ type CreateChannelInput struct {
 }
 
 type CreateChannelResolver struct {
-	obj *domain.Channel
+	obj    *domain.Channel
+	errors []error
+}
+
+func NewCreateChannelResolver(obj *domain.Channel, err ...error) *CreateChannelResolver {
+	return &CreateChannelResolver{
+		obj,
+		err,
+	}
+}
+
+func (t *CreateChannelResolver) Ok(ctx context.Context) bool {
+	return len(t.errors) == 0
 }
 
 func (t *CreateChannelResolver) Channel(ctx context.Context) (*ChannelResolver, error) {
 	return &ChannelResolver{t.obj}, nil
+}
+
+func (t *CreateChannelResolver) Errors() *[]*ErrorResolver {
+	return Errors(t.errors...)
 }
 
 func (t *Mutation) CreateChannel(ctx context.Context, args struct {
@@ -115,7 +146,8 @@ func (t *Mutation) CreateChannel(ctx context.Context, args struct {
 		IsPublic: args.Input.IsPublic,
 	}
 	channel, err := Aggregator(ctx).CreateChannel(ctx, channel)
-	return &CreateChannelResolver{channel}, errors.Wrapf(err, "error creating channel")
+	return NewCreateChannelResolver(channel, err), nil
+	//, errors.Wrapf(err, "error creating channel")
 }
 
 type SendMessageInput struct {
