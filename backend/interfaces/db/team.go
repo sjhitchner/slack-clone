@@ -84,7 +84,7 @@ func (t *TeamDB) ListTeamsByUserId(ctx context.Context, userId int64) ([]*domain
 //func (t *TeamDB) ListTeams(ctx context.Context) ([]*Team, error) {
 //}
 
-func (t *TeamDB) CreateTeam(ctx context.Context, team *domain.Team) (*domain.Team, error) {
+func (t *TeamDB) InsertTeam(ctx context.Context, team *domain.Team) (*domain.Team, error) {
 	log.Println(InsertTeam)
 
 	id, err := t.db.InsertWithId(
@@ -97,7 +97,7 @@ func (t *TeamDB) CreateTeam(ctx context.Context, team *domain.Team) (*domain.Tea
 	return team, errors.Wrapf(err, "unable to insert team")
 }
 
-func (t *TeamDB) AddTeamMember(ctx context.Context, member *domain.TeamMember) error {
+func (t *TeamDB) InsertTeamMember(ctx context.Context, member *domain.TeamMember) error {
 	log.Println(InsertTeamMember)
 
 	err := t.db.Insert(

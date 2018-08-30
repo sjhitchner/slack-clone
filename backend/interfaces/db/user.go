@@ -112,7 +112,7 @@ func (t *UserDB) ListUsersByChannelId(ctx context.Context, channelId int64) ([]*
 	return list, errors.Wrapf(err, "error getting users by channel '%d'", channelId)
 }
 
-func (t *UserDB) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
+func (t *UserDB) InsertUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 	log.Println(InsertUser)
 
 	id, err := t.db.InsertWithId(

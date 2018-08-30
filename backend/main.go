@@ -11,11 +11,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/sjhitchner/slack-clone/backend/domain"
+	//"github.com/sjhitchner/slack-clone/backend/domain"
 	libdb "github.com/sjhitchner/slack-clone/backend/infrastructure/db"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/db"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/graphql"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/resolvers"
+	"github.com/sjhitchner/slack-clone/backend/usecases/aggregator"
+	"github.com/sjhitchner/slack-clone/backend/usecases/interactor"
 	//libsql "github.com/sjhitchner/slack-clone/backend/infrastructure/db/psql"
 	libsql "github.com/sjhitchner/slack-clone/backend/infrastructure/db/sqlite"
 )
@@ -86,22 +88,19 @@ func main() {
 
 func SetupHandler(dbh libdb.DBHandler, schema string) (http.Handler, error) {
 
-	aggregator := struct {
-		domain.UserRepo
-		domain.TeamRepo
-		domain.ChannelRepo
-		domain.MessageRepo
-	}{
+	agg := aggregator.NewAggregator(
 		db.NewUserDB(dbh),
 		db.NewTeamDB(dbh),
 		db.NewChannelDB(dbh),
 		db.NewMessageDB(dbh),
-	}
+	)
+	inter := interactor.NewInteractor(agg)
 
 	handler := graphql.NewHandler(string(schema), &resolvers.Resolver{})
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "agg", aggregator)
+	ctx = context.WithValue(ctx, "agg", agg)
+	ctx = context.WithValue(ctx, "inter", inter)
 
 	return graphql.WrapContext(ctx, handler), nil
 }

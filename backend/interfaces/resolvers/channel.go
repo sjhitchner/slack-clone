@@ -26,17 +26,17 @@ func (t *ChannelResolver) IsPublic() bool {
 }
 
 func (t *ChannelResolver) Owner(ctx context.Context) (*UserResolver, error) {
-	user, err := Aggregator(ctx).GetUserById(ctx, t.obj.OwnerId)
+	user, err := Interactor(ctx).GetUserById(ctx, t.obj.OwnerId)
 	return &UserResolver{user}, errors.Wrapf(err, "failed getting team owner")
 }
 
 func (t *ChannelResolver) Team(ctx context.Context) (*TeamResolver, error) {
-	user, err := Aggregator(ctx).GetTeamById(ctx, t.obj.TeamId)
+	user, err := Interactor(ctx).GetTeamById(ctx, t.obj.TeamId)
 	return &TeamResolver{user}, errors.Wrapf(err, "failed getting team owner")
 }
 
 func (t *ChannelResolver) Messages(ctx context.Context) ([]*MessageResolver, error) {
-	list, err := Aggregator(ctx).ListMessagesByChannelId(ctx, t.obj.Id)
+	list, err := Interactor(ctx).ListMessagesByChannelId(ctx, t.obj.Id)
 	resolvers := make([]*MessageResolver, len(list))
 	for i := range resolvers {
 		resolvers[i] = &MessageResolver{list[i]}
@@ -45,7 +45,7 @@ func (t *ChannelResolver) Messages(ctx context.Context) ([]*MessageResolver, err
 }
 
 func (t *ChannelResolver) Members(ctx context.Context) ([]*UserResolver, error) {
-	list, err := Aggregator(ctx).ListUsersByChannelId(ctx, t.obj.Id)
+	list, err := Interactor(ctx).ListUsersByChannelId(ctx, t.obj.Id)
 	resolvers := make([]*UserResolver, len(list))
 	for i := range resolvers {
 		resolvers[i] = &UserResolver{list[i]}

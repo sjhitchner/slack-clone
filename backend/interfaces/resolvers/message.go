@@ -27,11 +27,11 @@ func (t *MessageResolver) Timestamp() string {
 }
 
 func (t *MessageResolver) User(ctx context.Context) (*UserResolver, error) {
-	user, err := Aggregator(ctx).GetUserById(ctx, t.obj.UserId)
+	user, err := Interactor(ctx).GetUserById(ctx, t.obj.UserId)
 	return &UserResolver{user}, errors.Wrapf(err, "failed getting message user")
 }
 
 func (t *MessageResolver) Channel(ctx context.Context) (*ChannelResolver, error) {
-	channel, err := Aggregator(ctx).GetChannelById(ctx, t.obj.ChannelId)
+	channel, err := Interactor(ctx).GetChannelById(ctx, t.obj.ChannelId)
 	return &ChannelResolver{channel}, errors.Wrapf(err, "failed getting message channel")
 }

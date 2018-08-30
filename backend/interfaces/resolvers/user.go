@@ -37,7 +37,7 @@ func (t *UserResolver) Password() string {
 }
 
 func (t *UserResolver) Teams(ctx context.Context) ([]*TeamResolver, error) {
-	list, err := Aggregator(ctx).ListTeamsByUserId(ctx, t.obj.Id)
+	list, err := Interactor(ctx).ListTeamsByUserId(ctx, t.obj.Id)
 	resolvers := make([]*TeamResolver, len(list))
 	for i := range resolvers {
 		resolvers[i] = &TeamResolver{list[i]}

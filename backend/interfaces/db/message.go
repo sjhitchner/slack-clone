@@ -75,7 +75,7 @@ func (t *MessageDB) ListMessagesByChannelId(ctx context.Context, channelId int64
 	return list, errors.Wrapf(err, "error getting messages by channel '%d'", channelId)
 }
 
-func (t *MessageDB) SendMessage(ctx context.Context, message *domain.Message) error {
+func (t *MessageDB) InsertMessage(ctx context.Context, message *domain.Message) error {
 	log.Println(InsertMessage)
 
 	err := t.db.Insert(

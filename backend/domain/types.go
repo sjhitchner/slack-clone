@@ -138,8 +138,8 @@ type TeamRepo interface {
 	ListTeamsByUserId(ctx context.Context, userId int64) ([]*Team, error)
 	// ListTeams(ctx context.Context) ([]*Team, error)
 
-	CreateTeam(ctx context.Context, team *Team) (*Team, error)
-	AddTeamMember(ctx context.Context, teamMember *TeamMember) error
+	InsertTeam(ctx context.Context, team *Team) (*Team, error)
+	InsertTeamMember(ctx context.Context, teamMember *TeamMember) error
 	DeleteTeamMember(ctx context.Context, teamMember *TeamMember) error
 }
 
@@ -148,8 +148,8 @@ type ChannelRepo interface {
 
 	ListChannelsByTeamId(ctx context.Context, teamId int64) ([]*Channel, error)
 
-	CreateChannel(ctx context.Context, channel *Channel) (*Channel, error)
-	AddChannelMember(ctx context.Context, channelMember *ChannelMember) error
+	InsertChannel(ctx context.Context, channel *Channel) (*Channel, error)
+	InsertChannelMember(ctx context.Context, channelMember *ChannelMember) error
 	DeleteChannelMember(ctx context.Context, channelMember *ChannelMember) error
 }
 
@@ -162,7 +162,7 @@ type UserRepo interface {
 	ListUsersByTeamId(ctx context.Context, teamId int64) ([]*User, error)
 	ListUsersByChannelId(ctx context.Context, channelId int64) ([]*User, error)
 
-	CreateUser(ctx context.Context, user *User) (*User, error)
+	InsertUser(ctx context.Context, user *User) (*User, error)
 }
 
 type MessageRepo interface {
@@ -171,7 +171,7 @@ type MessageRepo interface {
 	ListMessagesByChannelId(ctx context.Context, channelId int64) ([]*Message, error)
 	// ListMessagesByUserId(ctx context.Context, userId int64) ([]*Message, error)
 
-	SendMessage(ctx context.Context, message *Message) error
+	InsertMessage(ctx context.Context, message *Message) error
 }
 
 type Aggregator interface {
@@ -179,6 +179,21 @@ type Aggregator interface {
 	ChannelRepo
 	UserRepo
 	MessageRepo
+}
+
+type Interactor interface {
+	Aggregator
+	CreateUser(ctx context.Context, user *User) (*User, error)
+	RemoveUser(ctx context.Context, user *User) error
+	CreateTeam(ctx context.Context, team *Team) (*Team, error)
+	RemoveTeam(ctx context.Context, team *Team) error
+	CreateChannel(ctx context.Context, channel *Channel) (*Channel, error)
+	RemoveChannel(ctx context.Context, channel *Channel) error
+	AddTeamMember(ctx context.Context, teamMember *TeamMember) error
+	RemoveTeamMember(ctx context.Context, teamMember *TeamMember) error
+	AddChannelMember(ctx context.Context, channelMember *ChannelMember) error
+	RemoveChannelMember(ctx context.Context, channelMember *ChannelMember) error
+	SendMessage(ctx context.Context, message *Message) error
 }
 
 func (t User) String() string {

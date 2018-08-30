@@ -11,8 +11,14 @@ import (
 	"github.com/sjhitchner/slack-clone/backend/domain"
 )
 
+/*
 func Aggregator(ctx context.Context) domain.Aggregator {
 	return ctx.Value("agg").(domain.Aggregator)
+}
+*/
+
+func Interactor(ctx context.Context) domain.Interactor {
+	return ctx.Value("inter").(domain.Interactor)
 }
 
 func ToID(i int64) graphql.ID {
@@ -30,7 +36,7 @@ func (t *Resolver) Ping(ctx context.Context) string {
 func (t *Resolver) UserTeamList(ctx context.Context, args struct {
 	UserId int32
 }) ([]*TeamResolver, error) {
-	list, err := Aggregator(ctx).ListTeamsByUserId(ctx, int64(args.UserId))
+	list, err := Interactor(ctx).ListTeamsByUserId(ctx, int64(args.UserId))
 
 	resolvers := make([]*TeamResolver, len(list))
 	for i := range resolvers {
@@ -42,7 +48,7 @@ func (t *Resolver) UserTeamList(ctx context.Context, args struct {
 func (t *Resolver) ChannelMessageList(ctx context.Context, args struct {
 	ChannelId int32
 }) ([]*MessageResolver, error) {
-	list, err := Aggregator(ctx).ListMessagesByChannelId(ctx, int64(args.ChannelId))
+	list, err := Interactor(ctx).ListMessagesByChannelId(ctx, int64(args.ChannelId))
 
 	resolvers := make([]*MessageResolver, len(list))
 	for i := range resolvers {
@@ -54,7 +60,7 @@ func (t *Resolver) ChannelMessageList(ctx context.Context, args struct {
 func (t *Resolver) TeamChannelList(ctx context.Context, args struct {
 	TeamId int32
 }) ([]*ChannelResolver, error) {
-	list, err := Aggregator(ctx).ListChannelsByTeamId(ctx, int64(args.TeamId))
+	list, err := Interactor(ctx).ListChannelsByTeamId(ctx, int64(args.TeamId))
 
 	resolvers := make([]*ChannelResolver, len(list))
 	for i := range resolvers {
@@ -66,26 +72,26 @@ func (t *Resolver) TeamChannelList(ctx context.Context, args struct {
 func (t *Resolver) Team(ctx context.Context, args struct {
 	Id int32
 }) (*TeamResolver, error) {
-	obj, err := Aggregator(ctx).GetTeamById(ctx, int64(args.Id))
+	obj, err := Interactor(ctx).GetTeamById(ctx, int64(args.Id))
 	return &TeamResolver{obj}, errors.Wrapf(err, "error getting team %d", args.Id)
 }
 
 func (t *Resolver) Channel(ctx context.Context, args struct {
 	Id int32
 }) (*ChannelResolver, error) {
-	obj, err := Aggregator(ctx).GetChannelById(ctx, int64(args.Id))
+	obj, err := Interactor(ctx).GetChannelById(ctx, int64(args.Id))
 	return &ChannelResolver{obj}, errors.Wrapf(err, "error getting channel %d", args.Id)
 }
 
 func (t *Resolver) User(ctx context.Context, args struct {
 	Id int32
 }) (*UserResolver, error) {
-	obj, err := Aggregator(ctx).GetUserById(ctx, int64(args.Id))
+	obj, err := Interactor(ctx).GetUserById(ctx, int64(args.Id))
 	return &UserResolver{obj}, errors.Wrapf(err, "error getting user %d", args.Id)
 }
 
 func (t *Resolver) UserList(ctx context.Context) ([]*UserResolver, error) {
-	list, err := Aggregator(ctx).ListUsers(ctx)
+	list, err := Interactor(ctx).ListUsers(ctx)
 
 	resolvers := make([]*UserResolver, len(list))
 	for i := range resolvers {
