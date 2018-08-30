@@ -2,6 +2,7 @@ package interactor
 
 import (
 	"context"
+	"log"
 
 	"github.com/pkg/errors"
 
@@ -16,46 +17,52 @@ func NewInteractor(a domain.Aggregator) *Interactor {
 	return &Interactor{a}
 }
 
+func (t *Interactor) GetUserById(ctx context.Context, id int64) (*domain.User, error) {
+	log.Println("GetUserById", id)
+	return t.Aggregator.GetUserById(ctx, id)
+}
+
 func (t *Interactor) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
-	return t.InsertUser(ctx, user)
+
+	return t.Aggregator.InsertUser(ctx, user)
 }
 
 func (t *Interactor) RemoveUser(ctx context.Context, user *domain.User) error {
-	return errors.New("Not implemented") // t.DeleteUser(ctx, user)
+	return errors.New("Not implemented") // t.Aggregator.DeleteUser(ctx, user)
 }
 
 func (t *Interactor) CreateTeam(ctx context.Context, team *domain.Team) (*domain.Team, error) {
-	return t.InsertTeam(ctx, team)
+	return t.Aggregator.InsertTeam(ctx, team)
 }
 
 func (t *Interactor) RemoveTeam(ctx context.Context, team *domain.Team) error {
-	return errors.New("Not implemented") // t.DeleteTeam(ctx, team)
+	return errors.New("Not implemented") // t.Aggregator.DeleteTeam(ctx, team)
 }
 
 func (t *Interactor) CreateChannel(ctx context.Context, channel *domain.Channel) (*domain.Channel, error) {
-	return t.InsertChannel(ctx, channel)
+	return t.Aggregator.InsertChannel(ctx, channel)
 }
 
 func (t *Interactor) RemoveChannel(ctx context.Context, channel *domain.Channel) error {
-	return errors.New("Not implemented") // t.DeleteChannel(ctx, channel)
+	return errors.New("Not implemented") // t.Aggregator.DeleteChannel(ctx, channel)
 }
 
 func (t *Interactor) AddTeamMember(ctx context.Context, teamMember *domain.TeamMember) error {
-	return t.InsertTeamMember(ctx, teamMember)
+	return t.Aggregator.InsertTeamMember(ctx, teamMember)
 }
 
 func (t *Interactor) RemoveTeamMember(ctx context.Context, teamMember *domain.TeamMember) error {
-	return errors.New("Not implemented") // t.DeleteTeamMember(ctx, teamMember)
+	return errors.New("Not implemented") // t.Aggregator.DeleteTeamMember(ctx, teamMember)
 }
 
 func (t *Interactor) AddChannelMember(ctx context.Context, channelMember *domain.ChannelMember) error {
-	return t.InsertChannelMember(ctx, channelMember)
+	return t.Aggregator.InsertChannelMember(ctx, channelMember)
 }
 
-func (t *Interactor) RemoveChannelMember(ctx context.Context, channelMember *domain.TeamMember) error {
-	return errors.New("Not implemented") // t.RemoveTeamMember(ctx, teamMember)
+func (t *Interactor) RemoveChannelMember(ctx context.Context, channelMember *domain.ChannelMember) error {
+	return errors.New("Not implemented") // t.Aggregator.RemoveTeamMember(ctx, teamMember)
 }
 
 func (t *Interactor) SendMessage(ctx context.Context, message *domain.Message) error {
-	return t.InsertMessage(ctx, message)
+	return t.Aggregator.InsertMessage(ctx, message)
 }
