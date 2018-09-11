@@ -35,6 +35,7 @@ type Query {
 	ping: String!
 
 	userList: [User!]!
+	teamList(ownerId: ID!): [Team!]!
 
 	userTeamList(userId: ID!): [Team!]!
 	channelMessageList(channelId: ID!): [Message!]!
@@ -59,7 +60,6 @@ input SendMessageInput {
 
 input CreateTeamInput {
 	name: String!
-	ownerId: ID!
 }
 
 input CreateChannelInput {

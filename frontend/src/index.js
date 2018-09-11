@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { ApolloClient } from 'apollo-client';
 import { createHttpLink } from 'apollo-link-http';
 import { setContext } from 'apollo-link-context';
+import { onError } from 'apollo-link-error'
 import { InMemoryCache } from 'apollo-cache-inmemory';
-//import ApolloClient from "apollo-boost";
 import { ApolloProvider } from 'react-apollo';
 import 'semantic-ui-css/semantic.min.css';
 
@@ -24,8 +24,14 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 
+const logoutLink = onError(({ response, networkError }, callback ) => {
+	if (networkError && networkError.statusCode === 401) {
+		console.log("Network Error");	
+	}
+});
+
 const client = new ApolloClient({
-	link: authLink.concat(httpLink),
+	link: logoutLink.concat(authLink.concat(httpLink)),
 	cache: new InMemoryCache(),
 });
 

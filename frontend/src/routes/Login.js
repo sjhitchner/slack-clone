@@ -57,7 +57,7 @@ class Login extends React.Component {
 
     return (
       <Container text>
-        <Header as="h2">Register</Header>
+        <Header as="h2">Login</Header>
 		{ emailError || passwordError ? (
 			<Message error header="Login Errors" list={errorList} />
 		) : null}
@@ -84,4 +84,24 @@ class Login extends React.Component {
   }
 }
 
-export default Login;
+
+const loginMutation = gql`
+  mutation($email: String!, $password: String!) {
+    createUser(input: {
+		username: $username,
+		email: $email,
+		password: $password
+	}) {
+	  ok
+	  errors {
+	    type
+		field
+		message
+	  }
+	}
+  }
+`;
+
+
+
+export default graphql(loginMutation)(Login);

@@ -1,39 +1,78 @@
 package graphql
 
-/*
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
+	//"encoding/base64"
+	//"encoding/json"
 	"log"
-	"net"
+	//"net"
 	"net/http"
 	"strings"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	//jwt "github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
+	ggg "github.com/sjhitchner/slack-clone/backend/interfaces/context"
 	//gcontext "github.com/OscarYuen/go-graphql-starter/context"
 	//"github.com/OscarYuen/go-graphql-starter/model"
 	//"github.com/OscarYuen/go-graphql-starter/service"
 )
-*/
 
 // https://github.com/OscarYuen/go-graphql-starter/blob/master/handler/auth.go
 // TODO constants
 // TODO context variables, use integers for speed?
 const (
-	Authorization = "Authorization"
+	HeaderAuthorization = "Authorization"
+	HeaderBearer        = "Bearer"
 )
 
-/*
-func Authenticate(h http.Handler) http.Handler {
+func WrapAuth(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var (
-			isAuthorized = false
-			userId       string
-		)
-
 		ctx := r.Context()
+
+		userId, isAuthorized, err := ValidateAuthorizationHeader(ctx, r)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			log.Printf("Error validating authorization header %v\n", err)
+			return
+		}
+
+		if !isAuthorized {
+			w.WriteHeader(http.StatusUnauthorized)
+		}
+
+		ctx = ggg.SetCurrentUserId(ctx, userId)
+		//ctx = ggg.SetIsAuthorized(ctx, isAuthorized)
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func ValidateAuthorizationHeader(ctx context.Context, r *http.Request) (int64, bool, error) {
+	token, _ := ParseAuthorizationHeader(r)
+	//if err != nil {
+	//	return 0, false, err
+	//}
+
+	log.Println("TOKEN " + token)
+
+	// TODO Parse Token
+	return 1, true, nil
+}
+
+func ParseAuthorizationHeader(r *http.Request) (string, error) {
+	authHeader := r.Header.Get(HeaderAuthorization)
+	if authHeader == "" {
+		return "", errors.Errorf("No %s provided", HeaderAuthorization)
+	}
+
+	auth := strings.SplitN(authHeader, " ", 2)
+	if len(auth) != 2 || auth[0] != HeaderBearer {
+		return "", errors.Errorf("Invalid %s '%s'", HeaderAuthorization, authHeader)
+	}
+
+	return auth[1], nil
+}
+
+/*
 		token, err := validateBearerAuthHeader(ctx, r)
 		if err == nil {
 			isAuthorized = true
@@ -55,7 +94,9 @@ func Authenticate(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+*/
 
+/*
 func writeResponse(w http.ResponseWriter, response interface{}, code int) {
 	jsonResponse, _ := json.Marshal(response)
 	w.WriteHeader(code)

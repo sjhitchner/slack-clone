@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/sjhitchner/slack-clone/backend/domain"
+	ggg "github.com/sjhitchner/slack-clone/backend/interfaces/context"
 )
 
 type UserResolver struct {
@@ -37,7 +38,7 @@ func (t *UserResolver) Password() string {
 }
 
 func (t *UserResolver) Teams(ctx context.Context) ([]*TeamResolver, error) {
-	list, err := Interactor(ctx).ListTeamsByUserId(ctx, t.obj.Id)
+	list, err := ggg.Interactor(ctx).ListTeamsByUserId(ctx, t.obj.Id)
 	resolvers := make([]*TeamResolver, len(list))
 	for i := range resolvers {
 		resolvers[i] = &TeamResolver{list[i]}

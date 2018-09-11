@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/sjhitchner/slack-clone/backend/domain"
+	ggg "github.com/sjhitchner/slack-clone/backend/interfaces/context"
 )
 
 type Interactor struct {
@@ -32,7 +33,28 @@ func (t *Interactor) RemoveUser(ctx context.Context, user *domain.User) error {
 }
 
 func (t *Interactor) CreateTeam(ctx context.Context, team *domain.Team) (*domain.Team, error) {
-	return t.Aggregator.InsertTeam(ctx, team)
+
+	team.OwnerId = ggg.CurrentUserId(ctx)
+
+	if err := team.Validate(); err != nil {
+		return nil, errors.Wrapf(err, "Error validating team")
+	}
+
+	team, err := t.Aggregator.InsertTeam(ctx, team)
+	if err != nil {
+		return nil, err
+	}
+
+	teamMember := &domain.TeamMember{
+		TeamId: team.Id,
+		UserId: team.OwnerId,
+	}
+
+	if err = t.Aggregator.InsertTeamMember(ctx, teamMember); err != nil {
+		return nil, err
+	}
+
+	return team, nil
 }
 
 func (t *Interactor) RemoveTeam(ctx context.Context, team *domain.Team) error {

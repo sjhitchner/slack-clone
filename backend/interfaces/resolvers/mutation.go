@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/sjhitchner/slack-clone/backend/domain"
+	ggg "github.com/sjhitchner/slack-clone/backend/interfaces/context"
 )
 
 type Mutation struct {
@@ -51,19 +52,18 @@ func (t *Mutation) CreateUser(ctx context.Context, args struct {
 		Password: domain.Password(args.Input.Password),
 	}
 
-	// TODO Move this to an Interactor
+	// TODO Move this to an ggg.Interactor
 	if err := user.Validate(); err != nil {
 		return NewCreateUserResolver(nil, err), nil
 	}
 
-	user, err := Interactor(ctx).CreateUser(ctx, user)
+	user, err := ggg.Interactor(ctx).CreateUser(ctx, user)
 	return NewCreateUserResolver(user, err), nil
 	//}, errors.Wrapf(err, "error creating user")
 }
 
 type CreateTeamInput struct {
-	Name    string
-	OwnerId int32
+	Name string
 }
 
 type CreateTeamResolver struct {
@@ -95,11 +95,10 @@ func (t *Mutation) CreateTeam(ctx context.Context, args struct {
 }) (*CreateTeamResolver, error) {
 
 	team := &domain.Team{
-		OwnerId: int64(args.Input.OwnerId),
-		Name:    args.Input.Name,
+		Name: args.Input.Name,
 	}
 
-	team, err := Interactor(ctx).CreateTeam(ctx, team)
+	team, err := ggg.Interactor(ctx).CreateTeam(ctx, team)
 	return NewCreateTeamResolver(team, err), nil
 	//, errors.Wrapf(err, "error creating team")
 }
@@ -145,7 +144,7 @@ func (t *Mutation) CreateChannel(ctx context.Context, args struct {
 		Name:     args.Input.Name,
 		IsPublic: args.Input.IsPublic,
 	}
-	channel, err := Interactor(ctx).CreateChannel(ctx, channel)
+	channel, err := ggg.Interactor(ctx).CreateChannel(ctx, channel)
 	return NewCreateChannelResolver(channel, err), nil
 	//, errors.Wrapf(err, "error creating channel")
 }
@@ -172,7 +171,7 @@ func (t *Mutation) SendMessage(ctx context.Context, args struct {
 		ChannelId: int64(args.Input.ChannelId),
 		Text:      args.Input.Text,
 	}
-	err := Interactor(ctx).SendMessage(ctx, message)
+	err := ggg.Interactor(ctx).SendMessage(ctx, message)
 	return &SendMessageResolver{err == nil}, errors.Wrapf(err, "error sending message")
 }
 
@@ -196,7 +195,7 @@ func (t *Mutation) AddTeamMember(ctx context.Context, args struct {
 		TeamId: int64(args.Input.TeamId),
 		UserId: int64(args.Input.UserId),
 	}
-	err := Interactor(ctx).AddTeamMember(ctx, member)
+	err := ggg.Interactor(ctx).AddTeamMember(ctx, member)
 	return &TeamMemberResolver{err == nil}, errors.Wrapf(err, "error adding team member")
 }
 
@@ -207,7 +206,7 @@ func (t *Mutation) DeleteTeamMember(ctx context.Context, args struct {
 		TeamId: int64(args.Input.TeamId),
 		UserId: int64(args.Input.UserId),
 	}
-	err := Interactor(ctx).DeleteTeamMember(ctx, member)
+	err := ggg.Interactor(ctx).DeleteTeamMember(ctx, member)
 	return &TeamMemberResolver{err == nil}, errors.Wrapf(err, "error deleting team member")
 }
 
@@ -231,7 +230,7 @@ func (t *Mutation) AddChannelMember(ctx context.Context, args struct {
 		ChannelId: int64(args.Input.ChannelId),
 		UserId:    int64(args.Input.UserId),
 	}
-	err := Interactor(ctx).AddChannelMember(ctx, member)
+	err := ggg.Interactor(ctx).AddChannelMember(ctx, member)
 	return &ChannelMemberResolver{err == nil}, errors.Wrapf(err, "error adding channel member")
 }
 
@@ -242,6 +241,6 @@ func (t *Mutation) DeleteChannelMember(ctx context.Context, args struct {
 		ChannelId: int64(args.Input.ChannelId),
 		UserId:    int64(args.Input.UserId),
 	}
-	err := Interactor(ctx).DeleteChannelMember(ctx, member)
+	err := ggg.Interactor(ctx).DeleteChannelMember(ctx, member)
 	return &ChannelMemberResolver{err == nil}, errors.Wrapf(err, "error deleting channel member")
 }

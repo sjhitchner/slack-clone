@@ -13,6 +13,7 @@ import (
 
 	//"github.com/sjhitchner/slack-clone/backend/domain"
 	libdb "github.com/sjhitchner/slack-clone/backend/infrastructure/db"
+	ggg "github.com/sjhitchner/slack-clone/backend/interfaces/context"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/db"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/graphql"
 	"github.com/sjhitchner/slack-clone/backend/interfaces/resolvers"
@@ -99,10 +100,13 @@ func SetupHandler(dbh libdb.DBHandler, schema string) (http.Handler, error) {
 	handler := graphql.NewHandler(string(schema), &resolvers.Resolver{})
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "agg", agg)
-	ctx = context.WithValue(ctx, "inter", inter)
+	ctx = ggg.SetAggregator(ctx, agg)
+	ctx = ggg.SetInteractor(ctx, inter)
 
-	return graphql.WrapContext(ctx, handler), nil
+	return graphql.WrapContext(
+		ctx,
+		graphql.WrapAuth(handler),
+	), nil
 }
 
 func CheckError(err error) {

@@ -21,7 +21,7 @@ class CreateTeam extends React.Component {
 
     console.log(response);
 
-	const {ok, errors } = response.data.createTeam;
+	const {ok, errors} = response.data.createTeam;
 	if (!ok) {
 		const err = {};
 		errors.forEach(({field, message}) => {
@@ -66,8 +66,8 @@ class CreateTeam extends React.Component {
 }
 
 const createTeamMutation = gql`
-mutation ($name: String!, $ownerId: Int!) {
-  createTeam(input: {name: $name, ownerId: $ownerId}) {
+mutation ($name: String!) {
+  createTeam(input: {name: $name}) {
     ok
     team {
       id

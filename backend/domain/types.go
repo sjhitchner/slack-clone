@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 	"unicode"
+
+	"github.com/pkg/errors"
 )
 
 type Validator interface {
@@ -51,6 +53,19 @@ type User struct {
 	Username Username `db:"username"`
 	Email    Email    `db:"email"`
 	Password Password `db:"password"`
+}
+
+func (t Team) Validate() error {
+
+	if t.OwnerId == 0 {
+		return errors.New("Invalid owner id")
+	}
+
+	if len(t.Name) < 3 {
+		return errors.Errorf("Team name too short '%s'", t.Name)
+	}
+
+	return nil
 }
 
 // TODO multi errors?
