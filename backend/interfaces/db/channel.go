@@ -76,7 +76,7 @@ func (t *ChannelDB) ListChannelsByTeamId(ctx context.Context, teamId int64) ([]*
 	return list, errors.Wrapf(err, "error getting channels by team '%d'", teamId)
 }
 
-func (t *ChannelDB) CreateChannel(ctx context.Context, channel *domain.Channel) (*domain.Channel, error) {
+func (t *ChannelDB) InsertChannel(ctx context.Context, channel *domain.Channel) (*domain.Channel, error) {
 	log.Println(InsertChannel)
 
 	id, err := t.db.InsertWithId(
@@ -91,7 +91,7 @@ func (t *ChannelDB) CreateChannel(ctx context.Context, channel *domain.Channel) 
 	return channel, errors.Wrapf(err, "unable to insert channel")
 }
 
-func (t *ChannelDB) AddChannelMember(ctx context.Context, member *domain.ChannelMember) error {
+func (t *ChannelDB) InsertChannelMember(ctx context.Context, member *domain.ChannelMember) error {
 	log.Println(InsertChannelMember)
 
 	err := t.db.Insert(

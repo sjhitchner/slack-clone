@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	//"github.com/sjhitchner/graphql-resolver/lib/db"
 	"github.com/sjhitchner/slack-clone/backend/domain"
+	ggg "github.com/sjhitchner/slack-clone/backend/interfaces/context"
 )
 
 type Mutation struct {
@@ -19,11 +19,27 @@ type CreateUserInput struct {
 }
 
 type CreateUserResolver struct {
-	obj *domain.User
+	obj    *domain.User
+	errors []error
+}
+
+func NewCreateUserResolver(user *domain.User, err ...error) *CreateUserResolver {
+	return &CreateUserResolver{
+		user,
+		err,
+	}
+}
+
+func (t *CreateUserResolver) Ok() bool {
+	return len(t.errors) == 0
 }
 
 func (t *CreateUserResolver) User(ctx context.Context) (*UserResolver, error) {
-	return &UserResolver{t.obj}, nil
+	return NewUserResolver(t.obj), nil
+}
+
+func (t *CreateUserResolver) Errors() *[]*ErrorResolver {
+	return Errors(t.errors...)
 }
 
 func (t *Mutation) CreateUser(ctx context.Context, args struct {
@@ -31,26 +47,47 @@ func (t *Mutation) CreateUser(ctx context.Context, args struct {
 }) (*CreateUserResolver, error) {
 
 	user := &domain.User{
-		Username: args.Input.Username,
-		Email:    args.Input.Email,
-		Password: args.Input.Password,
+		Username: domain.Username(args.Input.Username),
+		Email:    domain.Email(args.Input.Email),
+		Password: domain.Password(args.Input.Password),
 	}
 
-	user, err := Aggregator(ctx).CreateUser(ctx, user)
-	return &CreateUserResolver{user}, errors.Wrapf(err, "error creating user")
+	// TODO Move this to an ggg.Interactor
+	if err := user.Validate(); err != nil {
+		return NewCreateUserResolver(nil, err), nil
+	}
+
+	user, err := ggg.Interactor(ctx).CreateUser(ctx, user)
+	return NewCreateUserResolver(user, err), nil
+	//}, errors.Wrapf(err, "error creating user")
 }
 
 type CreateTeamInput struct {
-	Name    string
-	OwnerId int32
+	Name string
 }
 
 type CreateTeamResolver struct {
-	obj *domain.Team
+	obj    *domain.Team
+	errors []error
+}
+
+func NewCreateTeamResolver(team *domain.Team, err ...error) *CreateTeamResolver {
+	return &CreateTeamResolver{
+		team,
+		err,
+	}
+}
+
+func (t *CreateTeamResolver) Ok(ctx context.Context) bool {
+	return len(t.errors) == 0
 }
 
 func (t *CreateTeamResolver) Team(ctx context.Context) (*TeamResolver, error) {
 	return &TeamResolver{t.obj}, nil
+}
+
+func (t *CreateTeamResolver) Errors() *[]*ErrorResolver {
+	return Errors(t.errors...)
 }
 
 func (t *Mutation) CreateTeam(ctx context.Context, args struct {
@@ -58,12 +95,12 @@ func (t *Mutation) CreateTeam(ctx context.Context, args struct {
 }) (*CreateTeamResolver, error) {
 
 	team := &domain.Team{
-		OwnerId: int64(args.Input.OwnerId),
-		Name:    args.Input.Name,
+		Name: args.Input.Name,
 	}
 
-	team, err := Aggregator(ctx).CreateTeam(ctx, team)
-	return &CreateTeamResolver{team}, errors.Wrapf(err, "error creating team")
+	team, err := ggg.Interactor(ctx).CreateTeam(ctx, team)
+	return NewCreateTeamResolver(team, err), nil
+	//, errors.Wrapf(err, "error creating team")
 }
 
 type CreateChannelInput struct {
@@ -74,11 +111,27 @@ type CreateChannelInput struct {
 }
 
 type CreateChannelResolver struct {
-	obj *domain.Channel
+	obj    *domain.Channel
+	errors []error
+}
+
+func NewCreateChannelResolver(obj *domain.Channel, err ...error) *CreateChannelResolver {
+	return &CreateChannelResolver{
+		obj,
+		err,
+	}
+}
+
+func (t *CreateChannelResolver) Ok(ctx context.Context) bool {
+	return len(t.errors) == 0
 }
 
 func (t *CreateChannelResolver) Channel(ctx context.Context) (*ChannelResolver, error) {
 	return &ChannelResolver{t.obj}, nil
+}
+
+func (t *CreateChannelResolver) Errors() *[]*ErrorResolver {
+	return Errors(t.errors...)
 }
 
 func (t *Mutation) CreateChannel(ctx context.Context, args struct {
@@ -91,8 +144,9 @@ func (t *Mutation) CreateChannel(ctx context.Context, args struct {
 		Name:     args.Input.Name,
 		IsPublic: args.Input.IsPublic,
 	}
-	channel, err := Aggregator(ctx).CreateChannel(ctx, channel)
-	return &CreateChannelResolver{channel}, errors.Wrapf(err, "error creating channel")
+	channel, err := ggg.Interactor(ctx).CreateChannel(ctx, channel)
+	return NewCreateChannelResolver(channel, err), nil
+	//, errors.Wrapf(err, "error creating channel")
 }
 
 type SendMessageInput struct {
@@ -117,7 +171,7 @@ func (t *Mutation) SendMessage(ctx context.Context, args struct {
 		ChannelId: int64(args.Input.ChannelId),
 		Text:      args.Input.Text,
 	}
-	err := Aggregator(ctx).SendMessage(ctx, message)
+	err := ggg.Interactor(ctx).SendMessage(ctx, message)
 	return &SendMessageResolver{err == nil}, errors.Wrapf(err, "error sending message")
 }
 
@@ -141,7 +195,7 @@ func (t *Mutation) AddTeamMember(ctx context.Context, args struct {
 		TeamId: int64(args.Input.TeamId),
 		UserId: int64(args.Input.UserId),
 	}
-	err := Aggregator(ctx).AddTeamMember(ctx, member)
+	err := ggg.Interactor(ctx).AddTeamMember(ctx, member)
 	return &TeamMemberResolver{err == nil}, errors.Wrapf(err, "error adding team member")
 }
 
@@ -152,7 +206,7 @@ func (t *Mutation) DeleteTeamMember(ctx context.Context, args struct {
 		TeamId: int64(args.Input.TeamId),
 		UserId: int64(args.Input.UserId),
 	}
-	err := Aggregator(ctx).DeleteTeamMember(ctx, member)
+	err := ggg.Interactor(ctx).DeleteTeamMember(ctx, member)
 	return &TeamMemberResolver{err == nil}, errors.Wrapf(err, "error deleting team member")
 }
 
@@ -176,7 +230,7 @@ func (t *Mutation) AddChannelMember(ctx context.Context, args struct {
 		ChannelId: int64(args.Input.ChannelId),
 		UserId:    int64(args.Input.UserId),
 	}
-	err := Aggregator(ctx).AddChannelMember(ctx, member)
+	err := ggg.Interactor(ctx).AddChannelMember(ctx, member)
 	return &ChannelMemberResolver{err == nil}, errors.Wrapf(err, "error adding channel member")
 }
 
@@ -187,6 +241,6 @@ func (t *Mutation) DeleteChannelMember(ctx context.Context, args struct {
 		ChannelId: int64(args.Input.ChannelId),
 		UserId:    int64(args.Input.UserId),
 	}
-	err := Aggregator(ctx).DeleteChannelMember(ctx, member)
+	err := ggg.Interactor(ctx).DeleteChannelMember(ctx, member)
 	return &ChannelMemberResolver{err == nil}, errors.Wrapf(err, "error deleting channel member")
 }
